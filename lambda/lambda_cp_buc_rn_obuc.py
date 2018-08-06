@@ -11,8 +11,8 @@ import boto3
 from pprint import pprint
 def lambda_handler(event, context):
     s3 = boto3.resource("s3")
-    source_bucket = s3.Bucket("jugad")
-    destination_bucket = s3.Bucket("blaze-text")
+    source_bucket = s3.Bucket("sbucket-name")
+    destination_bucket = s3.Bucket("dbucket-name")
 
     for obj in source_bucket.objects.all():
         destination_bucket_file_rename = obj.key + str("_new")
