@@ -5,7 +5,7 @@ __email__ = "chiragr83@gmail.com"
 __maintainer__ = "Chirag Rathod (Srce Cde)"
 
 import json
-with open("asr.json", "r") as f:
+with open("tag-aws-audio.json", "r") as f:
     json_load = json.load(f)
 
 segments = json_load["results"]["speaker_labels"]
