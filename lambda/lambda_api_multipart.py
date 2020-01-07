@@ -32,15 +32,18 @@ def lambda_handler(event, context):
         for part in msg.get_payload():
             multipart_content[part.get_param('name', header='content-disposition')] = part.get_payload(decode=True)
 
-        
+        # filename from form-data
         file_name = json.loads(multipart_content["Metadata"])["filename"]
+        #u uploading file to S3
         s3_upload = s3.put_object(Bucket="bucket-name", Key=file_name, Body=multipart_content["file"])
 
+        # on upload success
         return {
             'statusCode': 200,
             'body': json.dumps('File uploaded successfully!')
         }
     else:
+        # on upload failure
         return {
             'statusCode': 500,
             'body': json.dumps('Upload failed!')
