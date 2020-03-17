@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  flaskapp:
+    build: ./flaskapp-docker
+    container_name: flaskapp
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
