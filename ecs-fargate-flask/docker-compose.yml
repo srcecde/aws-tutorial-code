@@ -4,7 +4,9 @@ services:
   flaskapp:
     build: ./flaskapp-docker
     container_name: flaskapp
+    network_mode: host
 
   nginx:
     build: ./nginx
     container_name: nginx
+    network_mode: host
