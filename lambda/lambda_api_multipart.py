@@ -30,6 +30,10 @@ def lambda_handler(event, context):
         multipart_content = {}
         # retrieving form-data
         for part in msg.get_payload():
+            # checking if filename exist as a part of content-disposition header
+            if part.get_filename():
+                # fetching the filename
+                file_name = part.get_filename()
             multipart_content[part.get_param('name', header='content-disposition')] = part.get_payload(decode=True)
 
         # filename from form-data
