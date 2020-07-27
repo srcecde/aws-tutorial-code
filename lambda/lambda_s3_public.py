@@ -108,6 +108,18 @@ def lambda_handler(event, context):
         if flag:
             sendMessage(eventDetails, subject=None, message=None)
 
+    # check for CreateBucket eventype
+    if eventData.get('eventName') == 'CreateBucket':
+        # create client of S3
+        client = boto3.client('s3')
+        # setting put_public_access_block to True
+        r = client.put_public_access_block(Bucket=eventDetails.get('bucketName'), PublicAccessBlockConfiguration={
+            'BlockPublicAcls': True,
+            'IgnorePublicAcls': True,
+            'BlockPublicPolicy': True,
+            'RestrictPublicBuckets': True
+        })
+
     return {
         'statusCode': 200,
         'body': json.dumps('Thanks from Srce Cde!')
