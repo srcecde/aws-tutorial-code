@@ -15,7 +15,7 @@ def lambda_handler(event, context):
     # decoding form-data into bytes
     post_data = base64.b64decode(event['body'])
     # fetching content-type
-    content_type = event["headers"]['Content-Type']
+    content_type = event["headers"]['content-type']
     # concate Content-Type: with content_type from event
     ct = "Content-Type: "+content_type+"\n"
 
