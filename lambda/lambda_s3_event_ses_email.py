@@ -20,16 +20,22 @@ def lambda_handler(event, context):
 
     client = boto3.client("ses")
 
-    subject = str(action) + 'Event from ' + bucket_name
+    subject = str(action) + "Event from " + bucket_name
     body = """
         <br>
         This email is to notify you regarding {} event.
         The object {} is deleted.
         Source IP: {}
-    """.format(action, object, ip)
+    """.format(
+        action, object, ip
+    )
 
     message = {"Subject": {"Data": subject}, "Body": {"Html": {"Data": body}}}
 
-    response = client.send_email(Source = "sender-email", Destination = {"ToAddresses": ["to-address"]}, Message = message)
+    response = client.send_email(
+        Source="sender-email",
+        Destination={"ToAddresses": ["to-address"]},
+        Message=message,
+    )
 
     return "Thanks"

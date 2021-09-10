@@ -23,6 +23,10 @@ def lambda_handler(event, context):
     gray = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
     cv2.imwrite("/tmp/gray_obj.jpg", gray)
 
-    s3.put_object(Bucket=bucket_name, Key="grayscale.jpg", Body=open("/tmp/gray_obj.jpg", "rb").read())
+    s3.put_object(
+        Bucket=bucket_name,
+        Key="grayscale.jpg",
+        Body=open("/tmp/gray_obj.jpg", "rb").read(),
+    )
 
     return "Thanks"

@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 __author__ = "Chirag Rathod (Srce Cde)"
 __license__ = "MIT"
 __email__ = "chiragr83@gmail.com"
@@ -8,6 +8,7 @@ import json
 import boto3
 import fitz
 
+
 def lambda_handler(event, context):
     """Read file from s3 on trigger."""
     # boto3 client
@@ -15,10 +16,10 @@ def lambda_handler(event, context):
     if event:
         file_obj = event["Records"][0]
         # fetching bucket name from event
-        bucketname = str(file_obj['s3']['bucket']['name'])
+        bucketname = str(file_obj["s3"]["bucket"]["name"])
         # fetching file name from event
-        filename = str(file_obj['s3']['object']['key'])
-        # retrieving object from S3 
+        filename = str(file_obj["s3"]["object"]["key"])
+        # retrieving object from S3
         fileObj = s3.get_object(Bucket=bucketname, Key=filename)
         # reading botocore stream
         file_content = fileObj["Body"].read()
@@ -32,7 +33,4 @@ def lambda_handler(event, context):
                 text += page.getText()
 
         print(text)
-    return {
-        'statusCode': 200,
-        'body': json.dumps('Thanks from Srce Cde!')
-    }
+    return {"statusCode": 200, "body": json.dumps("Thanks from Srce Cde!")}

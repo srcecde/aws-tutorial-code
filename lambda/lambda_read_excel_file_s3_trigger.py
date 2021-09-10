@@ -26,23 +26,7 @@ def lambda_handler(event, context):
         df = pd.read_excel(read_excel_data)
         df = df.assign(dummy="dummy_value")
         df.to_csv("/tmp/updated.csv")
-        
+
         s3_resource.Bucket("bucket-name").upload_file("/tmp/updated.csv", "updated.csv")
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps('Hello from Lambda!')
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return {"statusCode": 200, "body": json.dumps("Hello from Lambda!")}
