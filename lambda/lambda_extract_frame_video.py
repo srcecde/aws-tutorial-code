@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 __author__ = "Chirag Rathod (Srce Cde)"
 __license__ = "MIT"
 __email__ = "chiragr83@gmail.com"
@@ -11,15 +11,16 @@ import boto3
 import os
 import uuid
 
+
 def lambda_handler(event, context):
     s3_resource = boto3.resource("s3")
     s3_client = boto3.client("s3")
     try:
         file_obj = event["Records"][0]
         # extract bucket name from event data on trigger
-        bucket_name = str(file_obj['s3']['bucket']['name'])
+        bucket_name = str(file_obj["s3"]["bucket"]["name"])
         # extract file name from event data on trigger
-        file_name = str(file_obj['s3']['object']['key'])
+        file_name = str(file_obj["s3"]["object"]["key"])
         print(f"Bucket Name: {bucket_name}\nFileName: {file_name}")
 
         # temporary path to save video file
@@ -37,17 +38,21 @@ def lambda_handler(event, context):
         frameRate = math.floor(cap.get(cv2.CAP_PROP_FPS))
 
         while cap.isOpened():
-        	# extracting frame
+            # extracting frame
             ret, frame = cap.read()
             frameCount += 1
-            if (ret != True):
+            if ret != True:
                 break
             # capturing frame every 10 seconds
-            if frameCount%(10*frameRate) == 0:
-            	# basically converting numpy array to bytes
-                res, im_jpg = cv2.imencode('.jpg', frame)
+            if frameCount % (10 * frameRate) == 0:
+                # basically converting numpy array to bytes
+                res, im_jpg = cv2.imencode(".jpg", frame)
                 # saving frame to s3
-                s3_client.put_object(Bucket="bucket-name", Key="{}.jpg".format(uuid.uuid4()), Body=im_jpg.tobytes())
+                s3_client.put_object(
+                    Bucket="bucket-name",
+                    Key="{}.jpg".format(uuid.uuid4()),
+                    Body=im_jpg.tobytes(),
+                )
 
     except Exception as e:
         print("Unable to extract frames : {}".format(e))

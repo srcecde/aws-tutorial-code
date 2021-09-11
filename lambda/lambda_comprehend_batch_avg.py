@@ -9,7 +9,7 @@ import json
 import boto3
 
 
-s3 = boto3.client('s3')
+s3 = boto3.client("s3")
 comprehend = boto3.client("comprehend")
 
 
@@ -19,12 +19,11 @@ def lambda_handler(event, context):
         bucket_name = s3_object["bucket"]["name"]
         file_name = s3_object["object"]["key"]
         file_obj = s3.get_object(Bucket=bucket_name, Key=file_name)
-        transcript_result = json.loads(file_obj['Body'].read())
+        transcript_result = json.loads(file_obj["Body"].read())
         paragraph = transcript_result["results"]["transcripts"][0]["transcript"]
 
         response = comprehend.batch_detect_sentiment(
-            TextList=data_chunk(paragraph),
-            LanguageCode='en'
+            TextList=data_chunk(paragraph), LanguageCode="en"
         )
 
         final_response = average_sentiment(response)
@@ -57,14 +56,20 @@ def average_sentiment(response):
         "POSITIVE": positive / total_record,
         "NEGATIVE": negative / total_record,
         "NEUTRAL": neutral / total_record,
-        "MIXED": mixed / total_record
+        "MIXED": mixed / total_record,
     }
 
-    response = json.dumps([{'Sentiment': max(mapping, key=mapping.get),
-                            'SentimentScore': {
-                                'Positive': mapping["POSITIVE"],
-                                'Negative': mapping["NEGATIVE"],
-                                'Neutral': mapping["NEUTRAL"],
-                                'Mixed': mapping["MIXED"]
-    }}])
+    response = json.dumps(
+        [
+            {
+                "Sentiment": max(mapping, key=mapping.get),
+                "SentimentScore": {
+                    "Positive": mapping["POSITIVE"],
+                    "Negative": mapping["NEGATIVE"],
+                    "Neutral": mapping["NEUTRAL"],
+                    "Mixed": mapping["MIXED"],
+                },
+            }
+        ]
+    )
     return response
