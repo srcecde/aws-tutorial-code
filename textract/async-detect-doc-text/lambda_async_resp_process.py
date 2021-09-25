@@ -24,6 +24,7 @@ def lambda_handler(event, context):
 
     csv_key_name = f"{job_id}.csv"
     df = pd.DataFrame(page_lines.items())
+    df.columns = ["PageNo", "Text"]
     df.to_csv(f"/tmp/{csv_key_name}", index=False)
 
     upload_to_s3(f"/tmp/{csv_key_name}", BUCKET_NAME, f"{PREFIX}/{csv_key_name}")
