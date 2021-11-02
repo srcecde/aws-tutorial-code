@@ -4,6 +4,7 @@ import logging
 import traceback
 from botocore.exceptions import ClientError
 
+
 def process_error():
     ex_type, ex_value, ex_traceback = sys.exc_info()
     traceback_string = traceback.format_exception(ex_type, ex_value, ex_traceback)
@@ -16,13 +17,15 @@ def process_error():
     )
     return error_msg
 
+
 def check_file_exists(s3, BUCKET_NAME, FILE_PATH):
     try:
-       s3.head_object(Bucket=BUCKET_NAME, Key=FILE_PATH)
-       return True
+        s3.head_object(Bucket=BUCKET_NAME, Key=FILE_PATH)
+        return True
     except ClientError:
         logging.error("File does not exists")
         return False
+
 
 def create_presigned_url(s3_client, bucket_name, object_name, expiration=60):
     """Generate a presigned URL to share an S3 object
@@ -35,10 +38,11 @@ def create_presigned_url(s3_client, bucket_name, object_name, expiration=60):
 
     # Generate a presigned URL for the S3 object
     try:
-        response = s3_client.generate_presigned_url('get_object',
-                                                    Params={'Bucket': bucket_name,
-                                                            'Key': object_name},
-                                                    ExpiresIn=expiration)
+        response = s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket_name, "Key": object_name},
+            ExpiresIn=expiration,
+        )
     except ClientError as e:
         logging.error(e)
         return None

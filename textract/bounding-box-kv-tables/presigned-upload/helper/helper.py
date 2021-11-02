@@ -4,6 +4,7 @@ import logging
 import traceback
 from botocore.exceptions import ClientError
 
+
 def process_error():
     ex_type, ex_value, ex_traceback = sys.exc_info()
     traceback_string = traceback.format_exception(ex_type, ex_value, ex_traceback)
@@ -16,8 +17,10 @@ def process_error():
     )
     return error_msg
 
-def create_presigned_post(s3_client, bucket_name, object_name,
-                          fields=None, conditions=None, expiration=60):
+
+def create_presigned_post(
+    s3_client, bucket_name, object_name, fields=None, conditions=None, expiration=60
+):
     """
     # Ref: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html
     Generate a presigned URL S3 POST request to upload a file
@@ -33,11 +36,13 @@ def create_presigned_post(s3_client, bucket_name, object_name,
     :return: None if error.
     """
     try:
-        response = s3_client.generate_presigned_post(bucket_name,
-                                                     object_name,
-                                                     Fields=fields,
-                                                     Conditions=conditions,
-                                                     ExpiresIn=expiration)
+        response = s3_client.generate_presigned_post(
+            bucket_name,
+            object_name,
+            Fields=fields,
+            Conditions=conditions,
+            ExpiresIn=expiration,
+        )
     except ClientError as e:
         process_error()
         logging.error(e)
