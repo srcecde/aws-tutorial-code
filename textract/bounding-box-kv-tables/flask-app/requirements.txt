@@ -1,0 +1,3 @@
+aws_requests_auth==0.4.3
+Flask==2.0.1
+requests==2.25.1

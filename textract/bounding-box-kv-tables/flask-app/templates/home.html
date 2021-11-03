@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>jQuery Preview an Image Before it is Uploaded</title>
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/style.css') }}">
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script>
+            function previewFile(input){
+                var file = $("input[type=file]").get(0).files[0];
+        
+                if(file){
+                    var reader = new FileReader();
+        
+                    reader.onload = function(){
+                        $("#previewImg").attr("src", reader.result);
+                    }
+        
+                    reader.readAsDataURL(file);
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div class="split left">
+            <form action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data">
+                <center>
+                        {% if uploaded_file %}
+                            <p><img id="previewImg" src ="data:;base64,{{ uploaded_file }}" alt="Placeholder"></p>
+                            <p><input type="file" name="uploadFile" onchange="previewFile(this);" required></p>
+                            <p><input type="submit" value="Submit"></p>
+                        {% else %}
+                            <p><img id="previewImg" src="static/favicon/srcecde.png" alt="Placeholder"></p>
+                            <p><input type="file" name="uploadFile" onchange="previewFile(this);" required></p>
+                            <p><input type="submit" value="Submit"></p>
+                        {% endif %}
+                </center>
+            </form>
+        </div>
+        
+        <div class="split right">
+                {% if processed_image %}
+                    <center>
+                            <p><img id="previewImg2" src = {{ processed_image }}  alt="eee"></p>
+                    </center>
+                {% endif %}
+        </div>
+    </body>
+</html>
