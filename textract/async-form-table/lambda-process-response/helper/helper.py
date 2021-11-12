@@ -8,13 +8,16 @@ Contributor: Chirag Rathod (Srce Cde)
 """
 
 import sys
+from collections import ChainMap
 import boto3
 import io
 import logging
 import traceback
 import json
-from .parser import Parse
 import pandas as pd
+from operator import itemgetter
+from .parser import Parse
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -87,6 +90,16 @@ def save_text_csv(keys, values, job_id, BUCKET_NAME):
     upload_to_s3(csv_buffer, BUCKET_NAME, key)
 
 
+def map_word_id(response):
+    word_map = {}
+    for block in response["Blocks"]:
+        if block["BlockType"] == "WORD":
+            word_map[block["Id"]] = block["Text"]
+        if block["BlockType"] == "SELECTION_ELEMENT":
+            word_map[block["Id"]] = block["SelectionStatus"]
+    return word_map
+
+
 def process_response(BUCKET_NAME, job_id, get_table=True, get_kv=True, get_text=True):
     textract = boto3.client("textract")
 
@@ -95,7 +108,7 @@ def process_response(BUCKET_NAME, job_id, get_table=True, get_kv=True, get_text=
 
     logging.info("Fetching response")
     response = textract.get_document_analysis(JobId=job_id)
-
+    print(type(response))
     pages.append(response)
 
     nextToken = None
@@ -106,32 +119,35 @@ def process_response(BUCKET_NAME, job_id, get_table=True, get_kv=True, get_text=
 
     while nextToken:
         response = textract.get_document_analysis(JobId=job_id, NextToken=nextToken)
+        print(type(response))
         pages.append(response)
+        print("NEXTTOKN")
         nextToken = None
         if "NextToken" in response:
             nextToken = response["NextToken"]
+        print(nextToken)
 
     keys, values = [], []
     text_key, text_value = [], []
     logger.info("Looping through pages & parsing the response")
+    pages_block = []
     for page in pages:
-        parse = Parse(page=page, get_table=True, get_kv=True, get_text=True)
-        table, final_map, text = parse.process_response()
+        pages_block.extend(page["Blocks"])
 
-        if get_table:
-            save_table_csv(table, job_id, BUCKET_NAME)
+    parse = Parse(
+        page=pages_block, get_table=get_table, get_kv=get_kv, get_text=get_text
+    )
+    table, final_map, text = parse.process_response()
 
-        if get_kv:
-            k, v = extract_kv(final_map)
-            keys.extend(k)
-            values.extend(v)
-
-        if get_text:
-            k, v = extract_kv_text(text)
-            text_key.extend(text)
-            text_value.extend(v)
     if get_kv:
+        keys = list(map(itemgetter(0), final_map))
+        values = list(map(itemgetter(1), final_map))
         save_kv_csv(keys, values, job_id, BUCKET_NAME)
+    if get_table:
+        save_table_csv(table, job_id, BUCKET_NAME)
     if get_text:
+        k, v = extract_kv_text(text)
+        text_key.extend(text)
+        text_value.extend(v)
         save_text_csv(text_key, text_value, job_id, BUCKET_NAME)
     logger.info("Parsing completed")

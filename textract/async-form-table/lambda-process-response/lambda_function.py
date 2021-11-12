@@ -15,15 +15,16 @@ from helper.helper import process_response, process_error
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-try:
-    BUCKET_NAME = os.environ["BUCKET_NAME"]
-    logger.info(f"Destination bucket: {BUCKET_NAME}")
-except Exception as e:
-    error_msg = process_error()
-    logger.error(error_msg)
-
 
 def lambda_handler(event, context):
+
+    try:
+        BUCKET_NAME = os.environ["BUCKET_NAME"]
+        logger.info(f"Destination bucket: {BUCKET_NAME}")
+    except Exception as e:
+        error_msg = process_error()
+        logger.error(error_msg)
+
     try:
         if "Records" in event:
             logger.info(f"Event: {event}")
@@ -34,8 +35,6 @@ def lambda_handler(event, context):
             process_response(
                 BUCKET_NAME, job_id, get_table=True, get_kv=True, get_text=True
             )
-
-            logger.info("CSV files uploaded to S3")
 
             return {
                 "statusCode": 200,
