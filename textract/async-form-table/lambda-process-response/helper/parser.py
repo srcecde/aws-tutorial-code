@@ -20,7 +20,7 @@ class Parse:
         self.response = page
         self.word_map = {}
         self.table_page_map = {}
-        self.key_map_list = []
+        self.key_map = []
         self.value_map = {}
         self.final_map_list = []
         self.line_text = {}
@@ -29,7 +29,7 @@ class Parse:
         self.get_text = get_text
 
     def extract_text(self, extract_by="LINE"):
-        for block in self.response["Blocks"]:
+        for block in self.response:
             if block["BlockType"] == extract_by:
                 page_key = f'page_{block["Page"]}'
                 if page_key in self.line_text.keys():
@@ -39,7 +39,7 @@ class Parse:
         return self.line_text
 
     def map_word_id(self):
-        for block in self.response["Blocks"]:
+        for block in self.response:
             if block["BlockType"] == "WORD":
                 self.word_map[block["Id"]] = block["Text"]
             if block["BlockType"] == "SELECTION_ELEMENT":
@@ -50,10 +50,10 @@ class Parse:
         table = {}
         ri = 0
         flag = False
-        page = self.response["Blocks"][0]["Page"]
-        response_block_len = len(self.response["Blocks"]) - 1
+        page = self.response[0]["Page"]
+        response_block_len = len(self.response) - 1
 
-        for n, block in enumerate(self.response["Blocks"]):
+        for n, block in enumerate(self.response):
 
             if block["BlockType"] == "TABLE":
                 key = f"table_{uuid.uuid4().hex}_page_{block['Page']}"
@@ -90,10 +90,7 @@ class Parse:
         return self.table_page_map
 
     def get_key_map(self):
-        key_map = {}
-        page = self.response["Blocks"][0]["Page"]
-        response_block_len = len(self.response["Blocks"]) - 1
-        for n, block in enumerate(self.response["Blocks"]):
+        for block in self.response:
 
             if block["BlockType"] == "KEY_VALUE_SET" and "KEY" in block["EntityTypes"]:
                 for relation in block["Relationships"]:
@@ -101,18 +98,10 @@ class Parse:
                         value_id = relation["Ids"]
                     if relation["Type"] == "CHILD":
                         v = " ".join([self.word_map[i] for i in relation["Ids"]])
-                        key_map[v] = value_id
-
-            if key_map:
-                if block["Page"] != page:
-                    self.key_map_list.append(key_map)
-                    page = block["Page"]
-                    key_map = {}
-                if response_block_len == n:
-                    self.key_map_list.append(key_map)
+                        self.key_map.append([v, value_id])
 
     def get_value_map(self):
-        for block in self.response["Blocks"]:
+        for block in self.response:
             if (
                 block["BlockType"] == "KEY_VALUE_SET"
                 and "VALUE" in block["EntityTypes"]
@@ -126,14 +115,10 @@ class Parse:
                     self.value_map[block["Id"]] = "VALUE_NOT_FOUND"
 
     def get_kv_map(self):
-        final_map = {}
-
-        for key in self.key_map_list:
-            for i, j in key.items():
-                final_map[i] = "".join(["".join(self.value_map[k]) for k in j])
-            if final_map:
-                self.final_map_list.append(final_map)
-                final_map = {}
+        for i in self.key_map:
+            self.final_map_list.append(
+                [i[0], "".join(["".join(self.value_map[k]) for k in i[1]])]
+            )
 
         return self.final_map_list
 
