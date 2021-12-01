@@ -10,6 +10,7 @@ Contributor: Chirag Rathod (Srce Cde)
 import os
 import json
 import boto3
+from urllib.parse import unquote_plus
 
 OUTPUT_BUCKET_NAME = os.environ["OUTPUT_BUCKET_NAME"]
 OUTPUT_S3_PREFIX = os.environ["OUTPUT_S3_PREFIX"]
@@ -23,7 +24,7 @@ def lambda_handler(event, context):
     if event:
         file_obj = event["Records"][0]
         bucketname = str(file_obj["s3"]["bucket"]["name"])
-        filename = str(file_obj["s3"]["object"]["key"])
+        filename = unquote_plus(str(file_obj["s3"]["object"]["key"]))
 
         print(f"Bucket: {bucketname} ::: Key: {filename}")
 

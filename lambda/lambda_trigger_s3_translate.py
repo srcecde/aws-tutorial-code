@@ -5,6 +5,7 @@ __email__ = "chiragr83@gmail.com"
 __maintainer__ = "Chirag Rathod (Srce Cde)"
 
 import json
+from urllib.parse import unquote_plus
 import boto3
 
 
@@ -14,7 +15,7 @@ def lambda_handler(event, context):
     if event:
         file_obj = event["Records"][0]
         bucket_name = str(file_obj["s3"]["bucket"]["name"])
-        filename = str(file_obj["s3"]["object"]["key"])
+        filename = unquote_plus(str(file_obj["s3"]["object"]["key"]))
         fileObj = s3.get_object(Bucket=bucket_name, Key=filename)
         file_content = fileObj["Body"].read().decode("utf-8")
         data = dataChunk(file_content)

@@ -8,6 +8,7 @@ Contributor: Chirag Rathod (Srce Cde)
 """
 
 import json
+from urllib.parse import unquote_plus
 import boto3
 
 transcribe = boto3.client("transcribe")
@@ -17,7 +18,7 @@ def lambda_handler(event, context):
     if event:
         file_obj = event["Records"][0]
         bucket_name = str(file_obj["s3"]["bucket"]["name"])
-        file_name = str(file_obj["s3"]["object"]["key"])
+        file_name = unquote_plus(str(file_obj["s3"]["object"]["key"]))
         s3_uri = create_uri(bucket_name, file_name)
         job_name = context.aws_request_id
 
