@@ -2,7 +2,7 @@ import asyncio
 import logging
 import json
 import boto3
-import numpy as np
+from urllib.parse import unquote_plus
 from helper.helper import process_response
 
 
@@ -13,7 +13,7 @@ def lambda_handler(event, context):
     if event:
         file_obj = event["Records"][0]
         bucketname = str(file_obj["s3"]["bucket"]["name"])
-        filename = str(file_obj["s3"]["object"]["key"])
+        filename = unquote_plus(str(file_obj["s3"]["object"]["key"]))
 
         logging.info(f"Bucket: {bucketname} ::: Key: {filename}")
 

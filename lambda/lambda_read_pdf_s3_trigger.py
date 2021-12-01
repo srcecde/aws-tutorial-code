@@ -6,6 +6,7 @@ __maintainer__ = "Chirag Rathod (Srce Cde)"
 
 import json
 import boto3
+from urllib.parse import unquote_plus
 import fitz
 
 
@@ -18,7 +19,7 @@ def lambda_handler(event, context):
         # fetching bucket name from event
         bucketname = str(file_obj["s3"]["bucket"]["name"])
         # fetching file name from event
-        filename = str(file_obj["s3"]["object"]["key"])
+        filename = unquote_plus(str(file_obj["s3"]["object"]["key"]))
         # retrieving object from S3
         fileObj = s3.get_object(Bucket=bucketname, Key=filename)
         # reading botocore stream
