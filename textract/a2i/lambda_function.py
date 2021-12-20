@@ -30,7 +30,7 @@ def lambda_handler(event, context):
             },
             FeatureTypes=["FORMS"],
             HumanLoopConfig={
-                "HumanLoopName": uuid.uuid4().hex.,
+                "HumanLoopName": uuid.uuid4().hex,
                 "FlowDefinitionArn": FLOW_ARN,
                 "DataAttributes": {
                     "ContentClassifiers": [
