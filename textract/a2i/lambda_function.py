@@ -8,13 +8,13 @@ Contributor: Chirag Rathod (Srce Cde)
 """
 import os
 import json
+import uuid
 from urllib.parse import unquote_plus
 import boto3
 
 
 def lambda_handler(event, context):
     textract = boto3.client("textract")
-    HUMAN_LOOP_NAME = os.environ["HUMAN_LOOP_NAME"]
     FLOW_ARN = os.environ["FLOW_ARN"]
     if event:
         file_obj = event["Records"][0]
@@ -30,7 +30,7 @@ def lambda_handler(event, context):
             },
             FeatureTypes=["FORMS"],
             HumanLoopConfig={
-                "HumanLoopName": HUMAN_LOOP_NAME,
+                "HumanLoopName": uuid.uuid4().hex.,
                 "FlowDefinitionArn": FLOW_ARN,
                 "DataAttributes": {
                     "ContentClassifiers": [
