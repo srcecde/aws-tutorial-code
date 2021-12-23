@@ -74,7 +74,7 @@ def lambda_handler(event, context):
         bucketname = str(file_obj["s3"]["bucket"]["name"])
         filename = unquote_plus(str(file_obj["s3"]["object"]["key"]))
         filename.split("/")[-1].split(".")[0]
-        key = f"{filename.split('/')[-1].split('.')[0]}_{uuid.uuid4().hex}"
+        key = f"analyze-expense-output/{filename.split('/')[-1].split('.')[0]}_{uuid.uuid4().hex}"
 
         try:
             response = textract.analyze_expense(
