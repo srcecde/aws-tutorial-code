@@ -34,23 +34,30 @@ def lambda_handler(event, context):
                     }
                 }
             )
+            print(json.dumps(response))
+            for i in response["ExpenseDocuments"]:
+                try:
+                    extract_kv(
+                        i["SummaryFields"],
+                        s3_client,
+                        bucketname,
+                        f"{key}/key_value.csv",
+                    )
+                except Exception as e:
+                    error_msg = process_error()
+                    logging.error(error_msg)
+                try:
+                    extract_lineitems(
+                        i["LineItemGroups"],
+                        s3_client,
+                        bucketname,
+                        f"{key}/lineitems.csv",
+                    )
+                except Exception as e:
+                    error_msg = process_error()
+                    logging.error(error_msg)
+
         except Exception as e:
             logging.error(e)
-
-        for i in response["ExpenseDocuments"]:
-            try:
-                extract_kv(
-                    i["SummaryFields"], s3_client, bucketname, f"{key}/key_value.csv"
-                )
-            except Exception as e:
-                error_msg = process_error()
-                logging.error(error_msg)
-            try:
-                extract_lineitems(
-                    i["LineItemGroups"], s3_client, bucketname, f"{key}/lineitems.csv"
-                )
-            except Exception as e:
-                error_msg = process_error()
-                logging.error(error_msg)
 
     return {"statusCode": 200, "body": json.dumps("Hello from Srce Cde!")}
