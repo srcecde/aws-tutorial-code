@@ -30,7 +30,7 @@ def check_ip(IP_ADDRESS, IP_RANGE):
 
 def lambda_handler(event, context):
     IP_ADDRESS = event["requestContext"]["http"]["sourceIp"]
-    IP_RANGE = ast.literal_eval(os.environ["IP_RANGE"])
+    IP_RANGE = ast.literal_eval(os.environ.get("IP_RANGE", "[]"))
     VALID_IP = check_ip(IP_ADDRESS, IP_RANGE)
     API_ID = event["requestContext"]["apiId"]
     ACC_ID = event["requestContext"]["accountId"]
