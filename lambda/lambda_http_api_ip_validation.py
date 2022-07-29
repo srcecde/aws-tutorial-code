@@ -37,7 +37,7 @@ def lambda_handler(event, context):
     METHOD = event["requestContext"]["http"]["method"]
     STAGE = event["requestContext"]["stage"]
     ROUTE = event["requestContext"]["http"]["path"]
-
+    ROUTEARN = event["routeArn"]
     if event["headers"]["authorizationtoken"] == "secretcode" and VALID_IP:
 
         response = {
@@ -48,7 +48,7 @@ def lambda_handler(event, context):
                     {
                         "Action": "execute-api:Invoke",
                         "Effect": "Allow",
-                        "Resource": f"arn:aws:execute-api:us-east-1:{ACC_ID}:{API_ID}/{STAGE}/{METHOD}{ROUTE}",
+                        "Resource": f"{ROUTEARN}",
                     }
                 ],
             },
@@ -65,7 +65,7 @@ def lambda_handler(event, context):
                 {
                     "Action": "execute-api:Invoke",
                     "Effect": "Deny",
-                    "Resource": f"arn:aws:execute-api:us-east-1:{ACC_ID}:{API_ID}/*/*/*",
+                    "Resource": f"{ROUTEARN}",
                 }
             ],
         },
