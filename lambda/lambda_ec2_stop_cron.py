@@ -37,7 +37,7 @@ def process_error() -> dict:
     return error_msg
 
 
-def fetch_regions():
+def fetch_regions() -> list:
     """
     Helper function to retrieve regions
 
@@ -168,7 +168,7 @@ def lambda_handler(event, context):
         rule_type = event["resources"][0].split("/")[-1]
 
         # checking which rule triggered the lambda function
-        if "ScheduledStopRule" in rule_type:
+        if "ScheduledEC2StopRule" in rule_type:
             start_stop_instances_across_region(regions, STOP=True)
 
         if "ScheduledEC2StartRule" in rule_type:
