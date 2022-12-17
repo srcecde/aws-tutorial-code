@@ -6,45 +6,69 @@ AWS Lambda
 Contributor: Chirag Rathod (Srce Cde)
 ========================
 """
+import sys
+import traceback
+import logging
 import json
 import boto3
 from urllib.parse import unquote_plus
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-def extract_text(response, extract_by="LINE"):
-    line_text = []
+
+def process_error() -> dict:
+    ex_type, ex_value, ex_traceback = sys.exc_info()
+    traceback_string = traceback.format_exception(ex_type, ex_value, ex_traceback)
+    error_msg = json.dumps(
+        {
+            "errorType": ex_type.__name__,
+            "errorMessage": str(ex_value),
+            "stackTrace": traceback_string,
+        }
+    )
+    return error_msg
+
+
+def extract_text(response: dict, extract_by="LINE") -> list:
+    text = []
     for block in response["Blocks"]:
         if block["BlockType"] == extract_by:
-            line_text.append(block["Text"])
-    return line_text
+            text.append(block["Text"])
+    return text
 
 
 def lambda_handler(event, context):
     textract = boto3.client("textract")
-    if event:
-        file_obj = event["Records"][0]
-        bucketname = str(file_obj["s3"]["bucket"]["name"])
-        filename = unquote_plus(str(file_obj["s3"]["object"]["key"]))
 
-        print(f"Bucket: {bucketname} ::: Key: {filename}")
+    try:
+        if "Records" in event:
+            file_obj = event["Records"][0]
+            bucketname = str(file_obj["s3"]["bucket"]["name"])
+            filename = unquote_plus(str(file_obj["s3"]["object"]["key"]))
 
-        response = textract.detect_document_text(
-            Document={
-                "S3Object": {
-                    "Bucket": bucketname,
-                    "Name": filename,
+            logging.info(f"Bucket: {bucketname} ::: Key: {filename}")
+
+            response = textract.detect_document_text(
+                Document={
+                    "S3Object": {
+                        "Bucket": bucketname,
+                        "Name": filename,
+                    }
                 }
+            )
+            logging.info(json.dumps(response))
+
+            # change LINE by WORD if you want word level extraction
+            raw_text = extract_text(response, extract_by="LINE")
+            logging.info(raw_text)
+
+            return {
+                "statusCode": 200,
+                "body": json.dumps("Document processed successfully!"),
             }
-        )
-        print(json.dumps(response))
+    except:
+        error_msg = process_error()
+        logger.error(error_msg)
 
-        # change LINE by WORD if you want word level extraction
-        raw_text = extract_text(response, extract_by="LINE")
-        print(raw_text)
-
-        return {
-            "statusCode": 200,
-            "body": json.dumps("Document processed successfully!"),
-        }
-
-    return {"statusCode": 500, "body": json.dumps("There is an issue!")}
+    return {"statusCode": 500, "body": json.dumps("Error processing the document!")}
