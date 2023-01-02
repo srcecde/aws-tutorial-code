@@ -10,6 +10,7 @@ import sys
 import traceback
 import logging
 import json
+import uuid
 import boto3
 from urllib.parse import unquote_plus
 
@@ -40,6 +41,7 @@ def extract_text(response: dict, extract_by="LINE") -> list:
 
 def lambda_handler(event, context):
     textract = boto3.client("textract")
+    s3 = boto3.client("s3")
 
     try:
         if "Records" in event:
@@ -62,6 +64,12 @@ def lambda_handler(event, context):
             # change LINE by WORD if you want word level extraction
             raw_text = extract_text(response, extract_by="LINE")
             logging.info(raw_text)
+
+            s3.put_object(
+                Bucket=bucketname,
+                Key=f"output/{filename.split('/')[-1]}_{uuid.uuid4().hex}.txt",
+                Body=str("\n".join(raw_text)),
+            )
 
             return {
                 "statusCode": 200,
