@@ -31,7 +31,7 @@ def lambda_handler(event, context):
                 Fields={"Content-Type": "image/jpg"},
                 Conditions=[
                     ["starts-with", "$Content-Type", "image/"],
-                    ["content-length-range", 0, 100485760],
+                    ["content-length-range", 0, 10485760],
                 ],
                 ExpiresIn=3600,
             )
