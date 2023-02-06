@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Pseudo Parameters"
+
+Resources:
+    S3Bucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Join [ '-', [ !Ref 'AWS::StackName', !Ref 'AWS::Region' ] ]
+Outputs:
+    AccountId:
+        Value: !Ref 'AWS::AccountId'
+    NotificationARN:
+        Value: !Select [ 0, !Ref 'AWS::NotificationARNs' ]
+    Partition:
+        Value: !Ref 'AWS::Partition'
+    Region:
+        Value: !Ref 'AWS::Region'
+    StackId:
+        Value: !Ref 'AWS::StackId'
+    StackName:
+        Value: !Ref 'AWS::StackName'
+    URLSuffix:
+        Value: !Ref 'AWS::URLSuffix'

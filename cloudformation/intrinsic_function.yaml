@@ -1,0 +1,9 @@
+Fn::Or
+	- Fn::Or acts as an OR operator
+	- Minimum number of condition is 2
+	- Maximum number of condition is 10
+	- Syntax: Fn::Or: [condition, ...]
+	- Short syntax: !Or [condition, ...]
+Example:
+MyOrCondition:
+  !Or [!Equals [sg-mysggroup, !Ref ASecurityGroup], Condition: SomeOtherCondition]

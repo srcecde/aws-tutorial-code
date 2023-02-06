@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates S3 bucket | Join"
+
+Parameters:
+    S3BucketName:
+        Description: Enter S3 bucket name
+        Type: String
+        MinLength: 3
+        MaxLength: 10
+        AllowedPattern: "[A-Za-z]+"
+
+Resources:
+    S3Bucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Join [ '-', [ !Ref S3BucketName, !Ref AWS::Region, !Ref AWS::StackName ] ]
+
+
+
+# abcd-us-east-1-abcd
+
+# !Join [ '', [ 'a', 'b', 'c' ] ]
+# abc
+
+# !Join
+#     - ''
+#     - - 'a'
+#       - 'b'
+#       - 'c'

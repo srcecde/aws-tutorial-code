@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion : "2010-09-09"
+Description: "Sample Template"
+
+Parameters:
+    S3BucketName:
+        Description: Enter S3 bucket name
+        Type: String
+        MinLength: 3
+        MaxLength: 10
+        AllowedPattern: "^[A-Za-z0-9_-]*$"
+
+    LambdaFunctionName:
+        Description: Enter Lambda function name
+        Type: String
+        MinLength: 3
+        MaxLength: 10
+        AllowedPattern: "^[A-Za-z0-9_-]*$"
+
+
+Resources:
+    S3Bucket:
+        Type: AWS::S3::Bucket
+        DeletionPolicy: Retain
+        Properties:
+            BucketName: !Join [ '-', [ !Ref S3BucketName, !Ref AWS::StackName, !Ref AWS::Region ] ]
+
+    IAMRole:
+        Type: AWS::IAM::Role
+        Properties:
+            ManagedPolicyArns: 
+                - arn:aws:iam::aws:policy/AWSLambdaExecute
+
+            AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                - Effect: Allow
+                  Principal:
+                    Service:
+                    - lambda.amazonaws.com
+                  Action:
+                  - sts:AssumeRole
+
+    LambdaFunction:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName: !Join [ '-', [ !Ref LambdaFunctionName, !Ref AWS::StackName, !Ref AWS::Region ] ]
+            Handler: lambda_function.lambda_handler
+            Runtime: python3.9
+            Role: !GetAtt IAMRole.Arn
+            Code:
+                ZipFile: |
+                  import json
+                  def lambda_handler(event, context):
+                      print(f"Event: {event}")
+                      return {
+                            'statusCode': 200,
+                            'body': json.dumps('Hello from Lambda!')
+                        }
+

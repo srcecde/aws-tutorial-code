@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "ChangeSet"
+
+Parameters:
+    S3BucketName:
+        Description: Enter S3 bucket name
+        Type: String
+
+Resources:
+    S3Bucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Ref S3BucketName
+Outputs:
+    BucketName:
+        Value: !Ref 'S3Bucket'
+
