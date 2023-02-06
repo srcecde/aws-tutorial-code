@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create EC2 instance"
+
+Parameters: 
+  Environment:
+    Type: String
+    AllowedValues:
+      - dev
+      - prod
+      - qa
+
+Mappings:
+  EnvMap: #logical id/name
+    dev:
+      instanceType: "t2.large"
+      name: "dev"
+
+    qa:
+      instanceType: "t2.medium"
+      name: "qa"
+
+    prod:
+      instanceType: "t2.xlarge"
+      name: "prod"
+
+Conditions: 
+  CreateProdResources: !Equals [ !Ref Environment, prod ]
+
+Resources: 
+  Instance: #logical id/name
+    Type: AWS::EC2::Instance
+    Properties: 
+      InstanceType: !FindInMap [EnvMap, !Ref Environment, instanceType]
+      ImageId: ami-0dba2cb6798deb6d8
+      Tags: 
+        - Key: "Name"
+          Value: !FindInMap [EnvMap, !Ref Environment, name]
+
+  MountPoint: 
+    Type: AWS::EC2::VolumeAttachment
+    Condition: CreateProdResources
+    Properties: 
+      InstanceId: 
+        !Ref Instance
+      VolumeId: 
+        !Ref NewVolume
+      Device: /dev/sdh
+
+  NewVolume: 
+    Type: AWS::EC2::Volume
+    Condition: CreateProdResources
+    Properties: 
+      Size: 100
+      AvailabilityZone: 
+        !GetAtt Instance.AvailabilityZone
+
+Outputs:
+    InstanceName:
+        Value: !Ref Instance

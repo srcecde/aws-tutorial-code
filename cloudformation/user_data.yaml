@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create EC2 instance"
+
+Parameters: 
+  InstanceTypeParameter: 
+    Description: Select instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues: 
+      - t2.micro
+      - t2.small
+      - t2.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+
+Resources: 
+  Instance: # logical id 
+    Type: AWS::EC2::Instance #type 
+    Properties: 
+      InstanceType: !Ref InstanceTypeParameter
+      ImageId: ami-0dba2cb6798deb6d8
+      KeyName: flask
+      UserData:
+        Fn::Base64: 
+          !Sub 
+            - |
+              #!/bin/bash
+              apt-get update -y 
+              apt-get install docker-compose -y
+              mkdir /home/ubuntu/${DirName}
+            - { DirName: !Join [ '-', [ !Ref AWS::StackName, !Ref AWS::Region, 'customdir' ] ] }

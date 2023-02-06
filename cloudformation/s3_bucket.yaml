@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates S3 bucket"
+
+Parameters:
+    S3BucketName:
+        Description: Enter S3 bucket name
+        Type: String
+        MinLength: 3
+        MaxLength: 10
+        AllowedPattern: "[A-Za-z]+"
+
+Resources:
+    S3Bucket: # logical id/name
+        Type: AWS::S3::Bucket # type of resource
+        Properties:
+            BucketName: !Ref S3BucketName
+Outputs:
+    BucketName:
+        Value: !Ref 'S3Bucket'

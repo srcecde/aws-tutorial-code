@@ -1,0 +1,9 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates S3 bucket | Split"
+
+Resources:
+    S3Bucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketName: !Select [0, !Split [ "|" , "randombucket-name|randombucket-name1|randombucket-name2" ]]
+

@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Export Values"
+
+Parameters: 
+  InstanceTypeParameter: 
+    Description: Select instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues: 
+      - t2.micro
+      - t2.small
+      - t2.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+
+
+Resources: 
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties: 
+      InstanceType: !Ref InstanceTypeParameter
+      ImageId: ami-0dba2cb6798deb6d8
+      AvailabilityZone: !Select 
+                        - 1
+                        - !GetAZs 
+                          Ref: 'AWS::Region'
+
+Outputs:
+  InstanceAvl:
+      Value: !GetAtt Instance.AvailabilityZone
+      Description: Availibility Zone
+      Export:
+        Name: "AvailZone"
+
+  InstanceId:
+      Value: !Ref Instance
+      Description: Instance information
+      Export:
+        Name: "Instance"
+
+
