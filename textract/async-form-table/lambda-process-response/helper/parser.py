@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 
 class Parse:
-    def __init__(self, page, get_table, get_kv, get_text):
+    def __init__(self, page, get_table, get_kv, get_text, get_signatures):
         self.response = page
         self.word_map = {}
         self.table_page_map = {}
@@ -27,6 +27,7 @@ class Parse:
         self.get_table = get_table
         self.get_kv = get_kv
         self.get_text = get_text
+        self.get_signatures = get_signatures
 
     def extract_text(self, extract_by="LINE"):
         for block in self.response:
@@ -44,6 +45,8 @@ class Parse:
                 self.word_map[block["Id"]] = block["Text"]
             if block["BlockType"] == "SELECTION_ELEMENT":
                 self.word_map[block["Id"]] = block["SelectionStatus"]
+            if block["BlockType"] == "SIGNATURE":
+                self.word_map[block["Id"]] = ""
 
     def extract_table_info(self):
         row = []
@@ -122,6 +125,17 @@ class Parse:
 
         return self.final_map_list
 
+    def get_signature_info(self):
+        page, signature, confidence = [], [], []
+        temp_counter = 0
+        for e, block in enumerate(self.response):
+            if block["BlockType"] == "SIGNATURE":
+                page.append(block.get("Page"))
+                signature.append(f"Signature {temp_counter+1}")
+                confidence.append(block.get("Confidence"))
+                temp_counter += 1
+        return (page, signature, confidence)
+
     def process_response(self):
         final_map, table_info, text = None, None, None
 
@@ -142,4 +156,8 @@ class Parse:
             logging.info("Extracting table information")
             table_info = self.extract_table_info()
 
-        return table_info, final_map, text
+        if self.get_signatures:
+            logging.info("Extracting signature information")
+            sign_info = self.get_signature_info()
+
+        return table_info, final_map, text, sign_info

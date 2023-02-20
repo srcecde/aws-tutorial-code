@@ -58,10 +58,7 @@ def lambda_handler(event, context):
 
             response = textract.start_document_analysis(
                 DocumentLocation={"S3Object": {"Bucket": bucketname, "Name": filename}},
-                FeatureTypes=[
-                    "TABLES",
-                    "FORMS",
-                ],
+                FeatureTypes=["TABLES", "FORMS", "SIGNATURES"],
                 OutputConfig={
                     "S3Bucket": OUTPUT_BUCKET_NAME,
                     "S3Prefix": OUTPUT_S3_PREFIX,
