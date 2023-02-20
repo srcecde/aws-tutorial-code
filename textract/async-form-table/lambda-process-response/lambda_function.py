@@ -33,7 +33,12 @@ def lambda_handler(event, context):
 
             logger.info("Parsing initiated")
             process_response(
-                BUCKET_NAME, job_id, get_table=True, get_kv=True, get_text=True
+                BUCKET_NAME,
+                job_id,
+                get_table=True,
+                get_kv=True,
+                get_text=True,
+                get_signatures=True,
             )
 
             return {
