@@ -27,19 +27,19 @@ def lambda_handler(event, context):
         logger.info(f"Event: {event}")
         object_name = event.get("queryStringParameters").get("guide")
 
-    try:
-        response = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": BUCKET_NAME, "Key": f"guide/{object_name}"},
-            ExpiresIn=3600,
-        )
-    except ClientError as e:
-        logging.error(e)
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": "Error processing the request",
-        }
+        try:
+            response = s3_client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": BUCKET_NAME, "Key": f"guide/{object_name}"},
+                ExpiresIn=3600,
+            )
+        except ClientError as e:
+            logging.error(e)
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": "Error processing the request",
+            }
 
     return {
         "statusCode": 200,
