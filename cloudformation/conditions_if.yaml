@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Intrinsic Function If example"
+
+Parameters: 
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+      - qa
+
+Conditions: 
+  isProd: !Equals [ !Ref Environment, prod ]
+
+Resources: 
+  InstanceConfig:
+    Type: AWS::EC2::Instance
+    Properties: 
+      InstanceType: !If [isProd,  t2.xlarge, t2.medium]
+        # 'Fn::If':
+        #   - isProd
+        #   - t2.xlarge
+        #   - t2.medium
+      ImageId: ami-0dba2cb6798deb6d8
+      Tags: 
+        - Key: "Name"
+          Value: !Ref Environment
+
+  NewVolumeConfig: 
+    Type: AWS::EC2::Volume
+    Properties: 
+      Size: !If [isProd, 500, 100]
+      AvailabilityZone: 
+        !GetAtt InstanceConfig.AvailabilityZone
+
+  VolumeMountConfig: 
+    Type: AWS::EC2::VolumeAttachment
+    Properties: 
+      InstanceId: 
+        !Ref InstanceConfig
+      VolumeId: 
+        !Ref NewVolumeConfig
+      Device: /dev/sdh
+
+Outputs:
+    InstanceName:
+        Value: !Ref InstanceConfig
