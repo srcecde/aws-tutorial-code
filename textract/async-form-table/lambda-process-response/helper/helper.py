@@ -101,6 +101,15 @@ def save_text_csv(keys, values, job_id, BUCKET_NAME):
     upload_to_s3(csv_buffer, BUCKET_NAME, key)
 
 
+def save_queries_csv(queries, job_id, BUCKET_NAME):
+    key = f"queries/{job_id}/queryAnswer.csv"
+    df = pd.DataFrame.from_dict(queries, orient="index").reset_index()
+    df.drop(["index", "answer_ids"], axis=1, inplace=True)
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer)
+    upload_to_s3(csv_buffer, BUCKET_NAME, key)
+
+
 def map_word_id(response):
     word_map = {}
     for block in response["Blocks"]:
@@ -112,7 +121,13 @@ def map_word_id(response):
 
 
 def process_response(
-    BUCKET_NAME, job_id, get_table=True, get_kv=True, get_text=True, get_signatures=True
+    BUCKET_NAME,
+    job_id,
+    get_table=True,
+    get_kv=True,
+    get_text=True,
+    get_signatures=True,
+    get_queries=True,
 ):
     textract = boto3.client("textract")
 
@@ -149,8 +164,9 @@ def process_response(
         get_kv=get_kv,
         get_text=get_text,
         get_signatures=get_signatures,
+        get_queries=get_queries,
     )
-    table, final_map, text, sign = parse.process_response()
+    table, final_map, text, sign, queries = parse.process_response()
 
     if get_kv:
         keys = list(map(itemgetter(0), final_map))
@@ -165,4 +181,6 @@ def process_response(
         save_text_csv(text_key, text_value, job_id, BUCKET_NAME)
     if get_signatures:
         save_sign_csv(sign, job_id, BUCKET_NAME)
+    if get_queries:
+        save_queries_csv(queries, job_id, BUCKET_NAME)
     logger.info("Parsing completed")

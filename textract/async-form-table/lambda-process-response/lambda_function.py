@@ -17,7 +17,6 @@ logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):
-
     try:
         BUCKET_NAME = os.environ["BUCKET_NAME"]
         logger.info(f"Destination bucket: {BUCKET_NAME}")
@@ -39,6 +38,7 @@ def lambda_handler(event, context):
                 get_kv=True,
                 get_text=True,
                 get_signatures=True,
+                get_queries=True,
             )
 
             return {

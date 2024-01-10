@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 
 class Parse:
-    def __init__(self, page, get_table, get_kv, get_text, get_signatures):
+    def __init__(self, page, get_table, get_kv, get_text, get_signatures, get_queries):
         self.response = page
         self.word_map = {}
         self.table_page_map = {}
@@ -28,6 +28,7 @@ class Parse:
         self.get_kv = get_kv
         self.get_text = get_text
         self.get_signatures = get_signatures
+        self.get_queries = get_queries
 
     def extract_text(self, extract_by="LINE"):
         for block in self.response:
@@ -57,7 +58,6 @@ class Parse:
         response_block_len = len(self.response) - 1
 
         for n, block in enumerate(self.response):
-
             if block["BlockType"] == "TABLE":
                 key = f"table_{uuid.uuid4().hex}_page_{block['Page']}"
                 temp_table = []
@@ -94,7 +94,6 @@ class Parse:
 
     def get_key_map(self):
         for block in self.response:
-
             if block["BlockType"] == "KEY_VALUE_SET" and "KEY" in block["EntityTypes"]:
                 for relation in block["Relationships"]:
                     if relation["Type"] == "VALUE":
@@ -136,8 +135,66 @@ class Parse:
                 temp_counter += 1
         return (page, signature, confidence)
 
+    def get_queries_info(self):
+        temp_id = []
+        f_response = {}
+
+        for e, block in enumerate(self.response):
+            if block["BlockType"] == "QUERY":
+                if "Relationships" not in block:
+                    rp = {
+                        "query": block.get("Query").get("Text"),
+                        "alias": block.get("Query").get("Alias"),
+                        "answer_ids": None,
+                        "answer": None,
+                        "confidence": None,
+                        "page": None,
+                    }
+                else:
+                    child_ids = [
+                        ids
+                        for rel in block.get("Relationships")
+                        for ids in rel["Ids"]
+                        if rel.get("Type") == "ANSWER"
+                    ]
+                    rp = {
+                        "query": block.get("Query").get("Text"),
+                        "alias": block.get("Query").get("Alias"),
+                        "answer_ids": child_ids,
+                        "answer": None,
+                        "confidence": None,
+                        "page": None,
+                    }
+
+                f_response[block.get("Id")] = rp
+                temp_id.append({block.get("Id"): rp})
+
+            if block["BlockType"] == "QUERY_RESULT":
+                q_id = list(temp_id[-1].keys())[0]
+                q_val = temp_id[-1].get(q_id)
+
+                if q_val.get("answer_ids"):
+                    if block.get("Id") in q_val.get("answer_ids"):
+                        q_ans = block.get("Text")
+                        confidence_s = block.get("Confidence")
+                        q_val["confidence"] = confidence_s
+                        if q_val.get("answer"):
+                            q_val["answer"] = f"{q_val.get('answer')} {q_ans}"
+                        else:
+                            q_val["answer"] = q_ans
+                        q_val["page"] = block.get("Page")
+                f_response[q_id] = q_val
+                temp_id = []
+        return f_response
+
     def process_response(self):
-        final_map, table_info, text = None, None, None
+        final_map, table_info, text, sign_info, queries_info = (
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
 
         logging.info("Mapping Id with word")
         self.map_word_id()
@@ -160,4 +217,8 @@ class Parse:
             logging.info("Extracting signature information")
             sign_info = self.get_signature_info()
 
-        return table_info, final_map, text, sign_info
+        if self.get_queries:
+            logging.info("Extracting queries information")
+            queries_info = self.get_queries_info()
+
+        return table_info, final_map, text, sign_info, queries_info
