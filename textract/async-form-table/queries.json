@@ -1,0 +1,25 @@
+{
+    "Queries": [
+        {
+            "Text": "shipping address",
+            "Alias": "shipping-address",
+            "Pages": [
+                "2"
+            ]
+        },
+        {
+            "Text": "due date",
+            "Alias": "due-date",
+            "Pages": [
+                "2"
+            ]
+        },
+        {
+            "Text": "position applying",
+            "Alias": "position-applying",
+            "Pages": [
+                "*"
+            ]
+        }
+    ]
+}
