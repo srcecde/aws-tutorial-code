@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CommaDelimitedList example"
+
+Parameters:
+    VpcCIDR:
+        Description: Please enter the IP range (CIDR notation) for this VPC
+        Type: String
+        Default: 172.192.0.0/16
+        AllowedPattern: "^([0-9]{1,3}\\.){3}[0-9]{1,3}\\/([0-9]|[1-2][0-9]|3[0-2])$"
+
+    # PublicSubnet1CIDR:
+    #     Description: Please enter the IP range (CIDR notation) for the public subnet in the first availability Zone
+    #     Type: String
+    #     Default: 172.192.10.0/24
+    #     AllowedPattern: "^([0-9]{1,3}\\.){3}[0-9]{1,3}\\/([0-9]|[1-2][0-9]|3[0-2])$"
+
+    # PublicSubnet2CIDR:
+    #     Description: Please enter the IP range (CIDR notation) for the public subnet in the second availability Zone
+    #     Type: String
+    #     Default: 172.192.11.0/24
+    #     AllowedPattern: "^([0-9]{1,3}\\.){3}[0-9]{1,3}\\/([0-9]|[1-2][0-9]|3[0-2])$"
+
+    PublicSubnetCIDR:
+        Description: Please enter the IP range (CIDR notation) for the public subnet in the first, second Availability Zone
+        Type: CommaDelimitedList
+        Default: "172.192.10.0/24, 172.192.11.0/24"
+        AllowedPattern: "^([0-9]{1,3}\\.){3}[0-9]{1,3}\\/([0-9]|[1-2][0-9]|3[0-2])$"
+
+    # PrivateSubnet1CIDR:
+    #     Description: Please enter the IP range (CIDR notation) for the private subnet in the first availability Zone
+    #     Type: String
+    #     Default: 172.192.20.0/24
+    #     AllowedPattern: "^([0-9]{1,3}\\.){3}[0-9]{1,3}\\/([0-9]|[1-2][0-9]|3[0-2])$"
+
+    # PrivateSubnet2CIDR:
+    #     Description: Please enter the IP range (CIDR notation) for the private subnet in the second availability Zone
+    #     Type: String
+    #     Default: 172.192.21.0/24
+    #     AllowedPattern: "^([0-9]{1,3}\\.){3}[0-9]{1,3}\\/([0-9]|[1-2][0-9]|3[0-2])$"
+    
+    PrivateSubnetCIDR: 
+        Description: Please enter the IP range (CIDR notation) for the private subnet in the first, second Availability Zone
+        Type: CommaDelimitedList
+        Default: "172.192.20.0/24, 172.192.21.0/24"
+        AllowedPattern: "^([0-9]{1,3}\\.){3}[0-9]{1,3}\\/([0-9]|[1-2][0-9]|3[0-2])$"
+
+
+Resources:
+    VPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: !Ref VpcCIDR
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+
+    PublicSubnet1:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [ 0, !GetAZs '' ]
+            MapPublicIpOnLaunch: true
+            # CidrBlock: !Ref PublicSubnet1CIDR
+            CidrBlock: !Select [0, !Ref PublicSubnetCIDR]
+      
+
+    PublicSubnet2:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+            MapPublicIpOnLaunch: true
+            # CidrBlock: !Ref PublicSubnet2CIDR
+            CidrBlock: !Select [1, !Ref PublicSubnetCIDR]
+      
+
+    PrivateSubnet1:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+            MapPublicIpOnLaunch: false
+            # CidrBlock: !Ref PrivateSubnet1CIDR
+            CidrBlock: !Select [0, !Ref PrivateSubnetCIDR]
+      
+
+    PrivateSubnet2:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+            MapPublicIpOnLaunch: false
+            # CidrBlock: !Ref PrivateSubnet2CIDR
+            CidrBlock: !Select [1, !Ref PrivateSubnetCIDR]
+
+
